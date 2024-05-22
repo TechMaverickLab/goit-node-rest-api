@@ -12,7 +12,12 @@ const updateContactSchema = Joi.object({
   phone: Joi.string(),
 }).or("name", "email", "phone");
 
+const updateFavoriteSchema = Joi.object({
+  favorite: Joi.boolean().required(),
+});
+
 module.exports = {
   contactSchema,
   updateContactSchema,
+  updateFavoriteSchema,
 };
