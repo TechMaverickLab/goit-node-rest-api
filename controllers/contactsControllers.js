@@ -5,7 +5,8 @@ const {
   addContact,
   updateContact,
 } = require("../services/contactsServices");
-const { HttpError } = require("../helpers/HttpError");
+const { createError } = require("../helpers/HttpError");
+const mongoose = require("mongoose");
 
 const getAllContacts = async (req, res, next) => {
   try {
@@ -18,9 +19,13 @@ const getAllContacts = async (req, res, next) => {
 
 const getContact = async (req, res, next) => {
   try {
-    const contact = await getContactById(req.params.id);
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw createError(400, "Invalid ID format");
+    }
+    const contact = await getContactById(id);
     if (!contact) {
-      throw HttpError(404, "Not found");
+      throw createError(404, "Not found");
     }
     res.status(200).json(contact);
   } catch (error) {
@@ -40,9 +45,13 @@ const createContact = async (req, res, next) => {
 
 const deleteContact = async (req, res, next) => {
   try {
-    const contact = await removeContact(req.params.id);
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw createError(400, "Invalid ID format");
+    }
+    const contact = await removeContact(id);
     if (!contact) {
-      throw HttpError(404, "Not found");
+      throw createError(404, "Not found");
     }
     res.status(200).json(contact);
   } catch (error) {
@@ -52,9 +61,30 @@ const deleteContact = async (req, res, next) => {
 
 const updateContactInfo = async (req, res, next) => {
   try {
-    const contact = await updateContact(req.params.id, req.body);
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw createError(400, "Invalid ID format");
+    }
+    const contact = await updateContact(id, req.body);
     if (!contact) {
-      throw HttpError(404, "Not found");
+      throw createError(404, "Not found");
+    }
+    res.status(200).json(contact);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateContactFavorite = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw createError(400, "Invalid ID format");
+    }
+    const { favorite } = req.body;
+    const contact = await updateContact(id, { favorite });
+    if (!contact) {
+      throw createError(404, "Not found");
     }
     res.status(200).json(contact);
   } catch (error) {
@@ -68,4 +98,5 @@ module.exports = {
   createContact,
   deleteContact,
   updateContactInfo,
+  updateContactFavorite,
 };
