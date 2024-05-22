@@ -1,3 +1,4 @@
+const { nanoid } = require("nanoid");
 const Contact = require("../schemas/contactModel");
 
 async function listContacts() {
@@ -9,12 +10,12 @@ async function getContactById(contactId) {
 }
 
 async function removeContact(contactId) {
-  const contact = await Contact.findByIdAndDelete(contactId); // Замінили findByIdAndRemove на findByIdAndDelete
+  const contact = await Contact.findByIdAndDelete(contactId);
   return contact;
 }
 
 async function addContact(name, email, phone) {
-  const newContact = new Contact({ name, email, phone });
+  const newContact = new Contact({ id: nanoid(), name, email, phone });
   await newContact.save();
   return newContact;
 }

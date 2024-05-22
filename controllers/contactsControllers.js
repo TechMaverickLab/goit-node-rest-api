@@ -25,7 +25,8 @@ const getContact = async (req, res, next) => {
     }
     const contact = await getContactById(id);
     if (!contact) {
-      throw createError(404, "Not found");
+      res.status(404).json({ message: "Not found" });
+      return;
     }
     res.status(200).json(contact);
   } catch (error) {
@@ -51,7 +52,8 @@ const deleteContact = async (req, res, next) => {
     }
     const contact = await removeContact(id);
     if (!contact) {
-      throw createError(404, "Not found");
+      res.status(404).json({ message: "Not found" });
+      return;
     }
     res.status(200).json(contact);
   } catch (error) {
@@ -67,7 +69,8 @@ const updateContactInfo = async (req, res, next) => {
     }
     const contact = await updateContact(id, req.body);
     if (!contact) {
-      throw createError(404, "Not found");
+      res.status(404).json({ message: "Not found" });
+      return;
     }
     res.status(200).json(contact);
   } catch (error) {
@@ -84,7 +87,8 @@ const updateContactFavorite = async (req, res, next) => {
     const { favorite } = req.body;
     const contact = await updateContact(id, { favorite });
     if (!contact) {
-      throw createError(404, "Not found");
+      res.status(404).json({ message: "Not found" });
+      return;
     }
     res.status(200).json(contact);
   } catch (error) {
