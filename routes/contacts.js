@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 const {
   getAllContacts,
@@ -7,21 +7,23 @@ const {
   deleteContact,
   updateContactInfo,
   updateContactFavorite,
-} = require("../controllers/contactsControllers");
+} = require('../controllers/contactsControllers');
 const {
   contactSchema,
   updateContactSchema,
   updateFavoriteSchema,
-} = require("../schemas/contactsSchemas");
-const validateBody = require("../helpers/validateBody");
+} = require('../schemas/contactsSchemas');
+const validateBody = require('../helpers/validateBody');
+const auth = require('../middlewares/auth');
 
-router.get("/", getAllContacts);
-router.get("/:id", getContact);
-router.post("/", validateBody(contactSchema), createContact);
-router.delete("/:id", deleteContact);
-router.put("/:id", validateBody(updateContactSchema), updateContactInfo);
+router.get('/', auth, getAllContacts);
+router.get('/:id', auth, getContact);
+router.post('/', auth, validateBody(contactSchema), createContact);
+router.delete('/:id', auth, deleteContact);
+router.put('/:id', auth, validateBody(updateContactSchema), updateContactInfo);
 router.patch(
-  "/:id/favorite",
+  '/:id/favorite',
+  auth,
   validateBody(updateFavoriteSchema),
   updateContactFavorite,
 );

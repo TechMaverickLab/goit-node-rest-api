@@ -4,3 +4,7 @@ node_modules
 
 project_copies/
 
+generateSecret.js
+test/
+middlewares/errorHandler.js.test
+*.log
