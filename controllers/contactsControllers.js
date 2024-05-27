@@ -10,7 +10,7 @@ const mongoose = require("mongoose");
 
 const getAllContacts = async (req, res, next) => {
   try {
-    const contacts = await listContacts();
+    const contacts = await listContacts({ owner: req.user._id });
     res.status(200).json(contacts);
   } catch (error) {
     next(error);
@@ -24,7 +24,7 @@ const getContact = async (req, res, next) => {
       throw createError(400, "Invalid ID format");
     }
     const contact = await getContactById(id);
-    if (!contact) {
+    if (!contact || contact.owner.toString() !== req.user._id.toString()) {
       res.status(404).json({ message: "Not found" });
       return;
     }
@@ -37,7 +37,7 @@ const getContact = async (req, res, next) => {
 const createContact = async (req, res, next) => {
   try {
     const { name, email, phone } = req.body;
-    const newContact = await addContact(name, email, phone);
+    const newContact = await addContact(name, email, phone, req.user._id);
     res.status(201).json(newContact);
   } catch (error) {
     next(error);
@@ -50,7 +50,7 @@ const deleteContact = async (req, res, next) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw createError(400, "Invalid ID format");
     }
-    const contact = await removeContact(id);
+    const contact = await removeContact(id, req.user._id);
     if (!contact) {
       res.status(404).json({ message: "Not found" });
       return;
@@ -67,7 +67,7 @@ const updateContactInfo = async (req, res, next) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw createError(400, "Invalid ID format");
     }
-    const contact = await updateContact(id, req.body);
+    const contact = await updateContact(id, req.body, req.user._id);
     if (!contact) {
       res.status(404).json({ message: "Not found" });
       return;
@@ -85,7 +85,7 @@ const updateContactFavorite = async (req, res, next) => {
       throw createError(400, "Invalid ID format");
     }
     const { favorite } = req.body;
-    const contact = await updateContact(id, { favorite });
+    const contact = await updateContact(id, { favorite }, req.user._id);
     if (!contact) {
       res.status(404).json({ message: "Not found" });
       return;
