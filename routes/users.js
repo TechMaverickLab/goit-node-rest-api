@@ -12,24 +12,5 @@ router.get('/current', auth, getCurrent);
 router.post('/logout', auth, logout);
 router.patch('/subscription', auth, updateSubscription);
 
-router.get('/', async (req, res, next) => {
-    try {
-      const users = await User.find({});
-      res.json(users);
-    } catch (error) {
-      next(error);
-    }
-  });
-
-  router.delete('/:id', async (req, res, next) => {
-    try {
-      const { id } = req.params;
-      await User.deleteOne({ _id: id });
-      res.status(204).send();
-    } catch (error) {
-      next(error);
-    }
-  });
-
   
 module.exports = router;

@@ -15,7 +15,7 @@ const register = async (req, res, next) => {
     newUser.setPassword(password);
     await newUser.save();
 
-    const payload = { id: newUser._id };
+    const payload = { id: newUser._id, token: newUser.token };
     const token = jwt.sign(payload, secret, { expiresIn: '1h' });
     newUser.token = token;
     await newUser.save();
@@ -40,9 +40,7 @@ const login = async (req, res, next) => {
       throw createError(401, 'Email or password is wrong');
     }
 
-    const payload = {
-      id: user._id,
-    };
+    const payload = { id: user._id, token: user.token };
 
     const token = jwt.sign(payload, secret, { expiresIn: '1h' });
     user.token = token;
@@ -75,6 +73,13 @@ const getCurrent = async (req, res, next) => {
 const logout = async (req, res, next) => {
   try {
     const user = req.user;
+    if (!user) {
+      return res.status(401).json({
+        status: 'error',
+        code: 401,
+        message: 'Not authorized',
+      });
+    }
     user.token = null;
     await user.save();
     res.status(204).send();

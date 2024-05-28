@@ -1,3 +1,4 @@
+// middlewares/auth.js
 const passport = require('passport');
 const passportJWT = require('passport-jwt');
 const User = require('../schemas/userModel');
@@ -14,21 +15,22 @@ const params = {
 
 // JWT Strategy
 passport.use(
-  new Strategy(params, (payload, done) => {
-    User.findById(payload.id)
-      .then(user => {
-        if (!user) {
-          return done(new Error('User not found'));
-        }
-        return done(null, user);
-      })
-      .catch(err => done(err));
+  new Strategy(params, async (payload, done) => {
+    try {
+      const user = await User.findById(payload.id);
+      if (!user) {
+        return done(new Error('User not found'), false);
+      }
+      return done(null, user);
+    } catch (err) {
+      return done(err, false);
+    }
   })
 );
 
 const auth = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user) => {
-    if (!user || err) {
+  passport.authenticate('jwt', { session: false }, async (err, user) => {
+    if (err || !user) {
       return res.status(401).json({
         status: 'error',
         code: 401,
@@ -36,6 +38,17 @@ const auth = (req, res, next) => {
         data: 'Unauthorized',
       });
     }
+    
+    // Перевірка токена в базі даних
+    if (user.token !== req.headers.authorization.split(' ')[1]) {
+      return res.status(401).json({
+        status: 'error',
+        code: 401,
+        message: 'Unauthorized',
+        data: 'Unauthorized',
+      });
+    }
+
     req.user = user;
     next();
   })(req, res, next);
