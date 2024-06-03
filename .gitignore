@@ -3,8 +3,12 @@ node_modules
 .DS_Store
 
 project_copies/
-
 generateSecret.js
-test/
 middlewares/errorHandler.js.test
 *.log
+
+yarn.lock
+.idea/
+.vscode/
+Thumbs.db
+

@@ -21,6 +21,7 @@ const userSchema = new Schema({
     type: String,
     default: null,
   },
+  avatarURL: { type: String, default: null },
 });
 
 userSchema.methods.setPassword = function(password) {

@@ -4,12 +4,14 @@ const connectDB = require('./config/db');
 require('dotenv').config();
 const passport = require('passport');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 app.use(passport.initialize());
+app.use('/avatars', express.static(path.join(__dirname, 'public/avatars')));
 
 app.use(bodyParser.json({ strict: true }));
 

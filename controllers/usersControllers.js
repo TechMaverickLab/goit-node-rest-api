@@ -2,6 +2,10 @@ const User = require('../schemas/userModel');
 const { createError } = require('../helpers/HttpError');
 const jwt = require('jsonwebtoken');
 const secret = process.env.SECRET;
+const gravatar = require('gravatar');
+const path = require('path');
+const jimp = require('jimp');
+const fs = require('fs').promises;
 
 const register = async (req, res, next) => {
   try {
@@ -10,8 +14,8 @@ const register = async (req, res, next) => {
     if (existingUser) {
       throw createError(409, 'Email in use');
     }
-
-    const newUser = new User({ email });
+    const avatarURL = gravatar.url(email);
+    const newUser = new User({ email, avatarURL });
     newUser.setPassword(password);
     await newUser.save();
 
@@ -25,6 +29,7 @@ const register = async (req, res, next) => {
       user: {
         email: newUser.email,
         subscription: newUser.subscription,
+        avatarURL: newUser.avatarURL,
       },
     });
   } catch (error) {
@@ -114,10 +119,32 @@ const updateSubscription = async (req, res, next) => {
   }
 };
 
+const updateAvatar = async (req, res, next) => {
+  try {
+    const { id: userId } = req.user;
+    const { path: tmpPath, filename } = req.file;
+    const avatarsDir = path.join(__dirname, '..', 'public', 'avatars');
+    const newPath = path.join(avatarsDir, filename);
+
+    const image = await jimp.read(tmpPath);
+    await image.resize(250, 250).writeAsync(tmpPath);
+
+    await fs.rename(tmpPath, newPath);
+
+    const avatarURL = `/avatars/${filename}`;
+    await User.findByIdAndUpdate(userId, { avatarURL }, { new: true });
+
+    res.json({ avatarURL });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   register,
   login,
   getCurrent,
   logout,
   updateSubscription,
+  updateAvatar, 
 };
