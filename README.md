@@ -20,6 +20,7 @@ SECRET=your_jwt_secret
 
 ## Routes
 
+Contacts
 - `/api/contacts`
   - GET `/` - Get all contacts
   - GET `/:id` - Get contact by ID
@@ -28,9 +29,31 @@ SECRET=your_jwt_secret
   - PUT `/:id` - Update contact by ID
   - PATCH `/:id/favorite` - Update contact's favorite status
 
+Users
 - `/api/users`
   - POST `/register` - Register a new user
   - POST `/login` - Login a user
   - GET `/current` - Get current user
   - POST `/logout` - Logout a user
   - PATCH `/subscription` - Update user subscription
+
+
+## Avatar Upload
+
+To update a user's avatar, use the following endpoint:
+
+Request
+- PATCH /api/users/avatars
+- Content-Type: multipart/form-data
+- Authorization: Bearer {{token}}
+- RequestBody: Uploaded file
+
+Successful Response
+- Status: 200 OK
+- Content-Type: application/json
+- ResponseBody:`{ "avatarURL": "link_to_the_uploaded_avatar" }`
+
+Error Response
+- Status: 401 Unauthorized
+- Content-Type: application/json
+- ResponseBody: `{ "message": "Not authorized" }`
