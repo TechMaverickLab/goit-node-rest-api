@@ -9,22 +9,34 @@ const fs = require('fs').promises;
 const sendEmail = require('../helpers/sendEmail');
 
 const register = async (req, res, next) => {
+  console.log('Функція реєстрації викликана');
   try {
     const { email, password } = req.body;
+    console.log('Запит тіла:', req.body);
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log('Користувач вже існує');
       throw createError(409, 'Email вжe використовується');
     }
+    console.log('Користувач не існує, продовжуємо реєстрацію');
 
     const avatarURL = gravatar.url(email);
+    console.log('Gravatar URL:', avatarURL);
+
     const { nanoid } = await import('nanoid');
     const verificationToken = nanoid();
+    console.log('Згенеровано токен підтвердження:', verificationToken);
 
     const newUser = new User({ email, password, avatarURL, verificationToken });
+    console.log('Новий користувач з токеном:', newUser.verificationToken);
+
     newUser.setPassword(password);
 
+    console.log('Користувач перед збереженням:', newUser.verificationToken);
+
     await newUser.save();
+    console.log('Користувач збережений з токеном:', newUser.verificationToken);
 
     const mail = {
       to: email,
@@ -33,30 +45,26 @@ const register = async (req, res, next) => {
       from: 'techmavericklab@gmail.com'
     };
 
+    console.log('Вміст електронної пошти:', mail);
+
     try {
       await sendEmail(mail);
+      console.log('Електронна пошта успішно надіслана');
     } catch (emailError) {
+      console.error('Помилка відправки електронної пошти:', emailError);
       await User.findByIdAndDelete(newUser._id);
       throw createError(500, 'Помилка відправки підтверджувального електронного листа');
     }
 
-    const payload = { id: newUser._id };
-    const token = jwt.sign(payload, secret, { expiresIn: '1h' });
-    newUser.token = token;
-    await newUser.save();
-
     res.status(201).json({
-      token, 
-      user: {
-        email: newUser.email,
-        subscription: newUser.subscription,
-        avatarURL: newUser.avatarURL,
-      },
+      message: 'Registration successful, please check your email to verify your account.',
     });
   } catch (error) {
+    console.error('Помилка під час реєстрації:', error);
     next(error);
   }
 };
+
 
 const login = async (req, res, next) => {
   try {
@@ -178,15 +186,23 @@ const verifyEmail = async (req, res, next) => {
 
     user.verify = true;
     user.verificationToken = null;
+
+    const payload = { id: user._id };
+    const token = jwt.sign(payload, secret, { expiresIn: '1h' });
+    user.token = token;
+
     await user.save();
 
     res.json({
       message: 'Підтвердження успішне',
+      token,
     });
   } catch (error) {
+    console.error('Помилка під час перевірки електронної пошти:', error);
     next(error);
   }
 };
+
 
 const resendVerificationEmail = async (req, res, next) => {
   try {
@@ -226,6 +242,8 @@ const resendVerificationEmail = async (req, res, next) => {
     next(error);
   }
 };
+
+
 
 module.exports = {
   register,

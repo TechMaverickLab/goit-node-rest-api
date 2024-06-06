@@ -42,17 +42,16 @@ describe('User Authentication', () => {
       .post('/api/users/register')
       .send(testUser)
       .expect(201);
-
-    expect(res.body).toHaveProperty('token');
-    expect(res.body.user).toHaveProperty('email', testUser.email);
-    expect(res.body.user).toHaveProperty('subscription', 'starter');
-
+  
+    expect(res.body).toHaveProperty('message', 'Registration successful, please check your email to verify your account.');
+    
     const user = await User.findOne({ email: testUser.email });
     expect(user).toBeDefined();
     expect(user.verificationToken).toBeDefined();
-
+  
     verificationToken = user.verificationToken;
   });
+  
 
   it('should not register a user with an existing email', async () => {
     await request(server)
