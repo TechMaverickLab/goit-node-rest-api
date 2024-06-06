@@ -1,4 +1,4 @@
-// middlewares/auth.js
+
 const passport = require('passport');
 const passportJWT = require('passport-jwt');
 const User = require('../schemas/userModel');
@@ -13,7 +13,6 @@ const params = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
 };
 
-// JWT Strategy
 passport.use(
   new Strategy(params, async (payload, done) => {
     try {
@@ -39,7 +38,7 @@ const auth = (req, res, next) => {
       });
     }
     
-    // Перевірка токена в базі даних
+  
     if (user.token !== req.headers.authorization.split(' ')[1]) {
       return res.status(401).json({
         status: 'error',

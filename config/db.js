@@ -13,4 +13,10 @@ const connectDB = async () => {
   }
 };
 
+const originalInvalidate = mongoose.Document.prototype.invalidate;
+mongoose.Document.prototype.invalidate = function(path, errorMsg, val, kind) {
+  console.log('Document invalidate called. Path:', path, 'Value:', val, 'Error:', errorMsg);
+  originalInvalidate.call(this, path, errorMsg, val, kind);
+};
+
 module.exports = connectDB;

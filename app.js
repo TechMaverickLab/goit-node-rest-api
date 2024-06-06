@@ -28,10 +28,7 @@ const routerUsers = require('./routes/users');
 app.use('/api/contacts', routerApi);
 app.use('/api/users', routerUsers);
 
-const errorHandler =
-  process.env.NODE_ENV === 'test'
-    ? require('./middlewares/errorHandler.js.test')
-    : require('./middlewares/errorHandler');
+const errorHandler = require('./middlewares/errorHandler');
 
 app.use(errorHandler);
 
