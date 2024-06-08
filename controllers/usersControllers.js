@@ -64,6 +64,7 @@ const register = async (req, res, next) => {
   }
 };
 
+
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -94,6 +95,7 @@ const login = async (req, res, next) => {
     next(error);
   }
 };
+
 
 const getCurrent = async (req, res, next) => {
   try {
@@ -186,21 +188,17 @@ const verifyEmail = async (req, res, next) => {
     user.verify = true;
     user.verificationToken = null;
 
-    const payload = { id: user._id };
-    const token = jwt.sign(payload, secret, { expiresIn: '1h' });
-    user.token = token;
-
     await user.save();
 
     res.json({
       message: 'Підтвердження успішне',
-      token,
     });
   } catch (error) {
     console.error('Помилка під час перевірки електронної пошти:', error);
     next(error);
   }
 };
+
 
 const resendVerificationEmail = async (req, res, next) => {
   try {
@@ -243,6 +241,7 @@ const resendVerificationEmail = async (req, res, next) => {
 };
 
 
+
 module.exports = {
   register,
   login,
@@ -252,4 +251,5 @@ module.exports = {
   updateAvatar,
   verifyEmail,
   resendVerificationEmail,
+
 };

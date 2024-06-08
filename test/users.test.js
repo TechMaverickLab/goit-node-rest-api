@@ -42,16 +42,15 @@ describe('User Authentication', () => {
       .post('/api/users/register')
       .send(testUser)
       .expect(201);
-  
+
     expect(res.body).toHaveProperty('message', 'Registration successful, please check your email to verify your account.');
-    
+
     const user = await User.findOne({ email: testUser.email });
     expect(user).toBeDefined();
     expect(user.verificationToken).toBeDefined();
-  
+
     verificationToken = user.verificationToken;
   });
-  
 
   it('should not register a user with an existing email', async () => {
     await request(server)
@@ -64,7 +63,35 @@ describe('User Authentication', () => {
       .send(testUser)
       .expect(409);
 
-      expect(res.body).toHaveProperty('message', 'Email вжe використовується');
+    expect(res.body).toHaveProperty('message', 'Email вжe використовується');
+  });
+
+  it('should verify a user email', async () => {
+    await request(server)
+      .post('/api/users/register')
+      .send(testUser)
+      .expect(201);
+
+    const user = await User.findOne({ email: testUser.email });
+    verificationToken = user.verificationToken;
+
+    const res = await request(server)
+      .get(`/api/users/verify/${verificationToken}`)
+      .expect(200);
+
+    expect(res.body).toHaveProperty('message', 'Підтвердження успішне');
+  });
+
+  it('should not verify email with invalid token', async () => {
+    await request(server)
+      .post('/api/users/register')
+      .send(testUser);
+
+    const res = await request(server)
+      .get(`/api/users/verify/invalidToken`)
+      .expect(404);
+
+    expect(res.body).toHaveProperty('message', 'Користувач не знайдений');
   });
 
   it('should login a user', async () => {
@@ -109,18 +136,6 @@ describe('User Authentication', () => {
       .expect(401);
 
     expect(res.body).toHaveProperty('message', 'Email або пароль невірний');
-  });
-
-  it('should not verify email with invalid token', async () => {
-    await request(server)
-      .post('/api/users/register')
-      .send(testUser);
-
-    const res = await request(server)
-      .get(`/api/users/verify/invalidToken`)
-      .expect(404);
-
-    expect(res.body).toHaveProperty('message', 'Користувач не знайдений');
   });
 
   it('should send a verification email on registration', async () => {
