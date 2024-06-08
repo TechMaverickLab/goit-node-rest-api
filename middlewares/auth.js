@@ -1,4 +1,3 @@
-
 const passport = require('passport');
 const passportJWT = require('passport-jwt');
 const User = require('../schemas/userModel');
@@ -29,7 +28,7 @@ passport.use(
 
 const auth = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, async (err, user) => {
-    if (err || !user || !user.verify) {
+    if (err || !user) {
       return res.status(401).json({
         status: 'error',
         code: 401,
@@ -37,7 +36,7 @@ const auth = (req, res, next) => {
         data: 'Unauthorized',
       });
     }
-    
+
     if (user.token !== req.headers.authorization.split(' ')[1]) {
       return res.status(401).json({
         status: 'error',
@@ -51,6 +50,5 @@ const auth = (req, res, next) => {
     next();
   })(req, res, next);
 };
-
 
 module.exports = auth;

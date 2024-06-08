@@ -12,7 +12,6 @@ const register = async (req, res, next) => {
   console.log('Функція реєстрації викликана');
   try {
     const { email, password } = req.body;
-    console.log('Запит тіла:', req.body);
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -29,14 +28,14 @@ const register = async (req, res, next) => {
     console.log('Згенеровано токен підтвердження:', verificationToken);
 
     const newUser = new User({ email, password, avatarURL, verificationToken });
-    console.log('Новий користувач з токеном:', newUser.verificationToken);
+    console.log('Новий користувач з токеном підтвердження:', newUser.verificationToken);
 
     newUser.setPassword(password);
 
     console.log('Користувач перед збереженням:', newUser.verificationToken);
 
     await newUser.save();
-    console.log('Користувач збережений з токеном:', newUser.verificationToken);
+    console.log('Користувач збережений з токеном підтвердження:', newUser.verificationToken);
 
     const mail = {
       to: email,
@@ -64,7 +63,6 @@ const register = async (req, res, next) => {
     next(error);
   }
 };
-
 
 const login = async (req, res, next) => {
   try {
@@ -99,7 +97,7 @@ const login = async (req, res, next) => {
 
 const getCurrent = async (req, res, next) => {
   try {
-    const { email, subscription } = req.user;
+    const { email, subscription, token } = req.user;
     res.json({
       email,
       subscription,
@@ -121,6 +119,7 @@ const logout = async (req, res, next) => {
     }
     user.token = null;
     await user.save();
+    console.log('Користувач вийшов з системи, токен анульовано');
     res.status(204).send();
   } catch (error) {
     next(error);
@@ -155,7 +154,7 @@ const updateSubscription = async (req, res, next) => {
 
 const updateAvatar = async (req, res, next) => {
   try {
-    const { id: userId } = req.user;
+    const { id: userId, token } = req.user;
     const { path: tmpPath, filename } = req.file;
     const avatarsDir = path.join(__dirname, '..', 'public', 'avatars');
     const newPath = path.join(avatarsDir, filename);
@@ -203,7 +202,6 @@ const verifyEmail = async (req, res, next) => {
   }
 };
 
-
 const resendVerificationEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -235,6 +233,7 @@ const resendVerificationEmail = async (req, res, next) => {
 
     await sendEmail(mail);
 
+
     res.json({
       message: 'Підтверджувальний лист надіслано',
     });
@@ -242,7 +241,6 @@ const resendVerificationEmail = async (req, res, next) => {
     next(error);
   }
 };
-
 
 
 module.exports = {
